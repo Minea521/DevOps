@@ -1,4 +1,9 @@
 pipeline {
+
+    agent {
+        label 'laravelAgent'
+    }
+
     stages {
         stage('Build') {
             steps {
