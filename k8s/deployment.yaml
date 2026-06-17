@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: A-minea-web-deployment
+  labels:
+    app: A-minea-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: A-minea-web
+  template:
+    metadata:
+      labels:
+        app: A-minea-web
+    spec:
+      containers:
+      - name: web-server
+        image: demo-web-server:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://mysql-service:3306/A-minea-db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "root"
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "Hello@123"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: A-minea-mysql-deployment
+  labels:
+    app: A-minea-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: A-minea-mysql
+  template:
+    metadata:
+      labels:
+        app: A-minea-mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "Hello@123"
+        - name: MYSQL_DATABASE
+          value: "A-minea-db"
+        volumeMounts:
+        - name: mysql-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-storage
+        emptyDir: {}
