@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ID Card Profiles</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <h1>Student & Employee Profiles</h1>
+
+        <!-- Action Buttons -->
+        <div class="action-links">
+            <a href="/profiles/new" class="btn btn-primary">➕ New Profile</a>
+            <a href="/profiles/batch/pdf" class="btn btn-success">📄 Download All as PDF</a>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Reg Number</th>
+                        <th>Full Name</th>
+                        <th>Type</th>
+                        <th>Department</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="profile, iterStat : ${profiles}">
+                        <td th:text="${iterStat.index + 1}"></td>
+                        <td th:text="${profile.registrationNumber}"></td>
+                        <td th:text="${profile.fullName}"></td>
+                        <td>
+                            <span class="badge" th:classappend="${profile.type == 'STUDENT'} ? 'badge-student' : 
+                                ${profile.type == 'EMPLOYEE'} ? 'badge-employee' : 'badge-user'">
+                                <span th:text="${profile.type}"></span>
+                            </span>
+                        </td>
+                        <td th:text="${profile.department} ?: 'N/A'"></td>
+                        <td>
+                            <div class="action-cell">
+                                <a th:href="@{/profiles/{uuid}(uuid=${profile.uuid})}" class="btn-action view">👁️ View</a>
+                                <a th:href="@{/profiles/{uuid}/edit(uuid=${profile.uuid})}" class="btn-action edit">✏️ Edit</a>
+                                <a th:href="@{/profiles/{uuid}/pdf(uuid=${profile.uuid})}" class="btn-action pdf">📄 PDF</a>
+                                <a th:href="@{/profiles/{uuid}/delete(uuid=${profile.uuid})}" 
+                                   class="btn-action delete" 
+                                   onclick="return confirm('Are you sure you want to delete this profile?')">🗑️ Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${profiles.isEmpty()}">
+                        <td colspan="6" style="text-align: center; padding: 40px 20px; color: #6b7280;">
+                            <div style="font-size: 3rem; margin-bottom: 10px;">📭</div>
+                            <div style="font-size: 1.1rem; font-weight: 500;">No profiles found</div>
+                            <div style="font-size: 0.9rem; margin-top: 5px;">Click "New Profile" to create your first ID card</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Stats Footer -->
+        <div style="margin-top: 20px; padding: 15px 0; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <span style="font-weight: 600; color: #1a2332;">Total Profiles:</span>
+                <span style="background: #1d4ed8; color: white; padding: 2px 12px; border-radius: 20px; font-weight: 600;" th:text="${profiles.size()}">0</span>
+            </div>
+            <div style="display: flex; gap: 15px; font-size: 0.9rem; color: #6b7280;">
+                <span>🟦 Student: <span th:text="${#lists.size(profiles.?[type == 'STUDENT'])}">0</span></span>
+                <span>🟩 Employee: <span th:text="${#lists.size(profiles.?[type == 'EMPLOYEE'])}">0</span></span>
+                <span>🟨 User: <span th:text="${#lists.size(profiles.?[type == 'USER'])}">0</span></span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

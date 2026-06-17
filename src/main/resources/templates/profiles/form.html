@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create / Edit Profile</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <h1>Create / Edit Profile</h1>
+
+        <div class="form-container">
+            <form th:action="@{/profiles}" method="post" enctype="multipart/form-data" id="profileForm">
+                <input type="hidden" name="id" th:value="${profile.id}">
+                
+                <div class="form-group">
+                    <label>Full Name <span class="required">*</span></label>
+                    <input type="text" name="fullName" th:value="${profile.fullName}" oninput="updatePreview()" placeholder="Enter full name" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Profile Type <span class="required">*</span></label>
+                        <select name="type" th:value="${profile.type}" onchange="updatePreview()" required>
+                            <option value="">Select Type</option>
+                            <option value="STUDENT">Student</option>
+                            <option value="EMPLOYEE">Employee</option>
+                            <option value="USER">User</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Department</label>
+                        <input type="text" name="department" th:value="${profile.department}" oninput="updatePreview()" placeholder="Enter department">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Title / Position</label>
+                    <input type="text" name="title" th:value="${profile.title}" oninput="updatePreview()" placeholder="e.g., Software Engineer, Student, etc.">
+                </div>
+
+                <div class="form-group">
+                    <label>Photo</label>
+                    <input type="file" name="photo" accept="image/jpeg,image/png" onchange="previewPhoto(event)">
+                    <small style="display:block; margin-top:5px; color:#6b7280;">Upload a photo (JPEG or PNG format)</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">💾 Save Profile</button>
+                    <a href="/profiles" class="btn btn-danger">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Live Preview -->
+        <div id="preview">
+            <h3>📇 Live ID Card Preview</h3>
+            <div class="idcard" id="idcard">
+                <h2 th:text="${profile?.template?.organizationName} ?: 'Your Institution'">Your Institution</h2>
+                <div class="subtitle">OFFICIAL ID CARD</div>
+                <img id="photoPreview" src="" alt="Photo"/>
+                <div class="info">
+                    <h3 id="previewName">Full Name</h3>
+                    <p id="previewTitle">Title / Position</p>
+                    <p id="previewReg">Registration Number</p>
+                </div>
+                <!-- QR Code placeholder -->
+                <div style="margin-top: 8px; font-size: 0.7rem; opacity: 0.7;">● ● ● ● ●</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updatePreview() {
+            const fullName = document.querySelector('input[name="fullName"]').value || "Full Name";
+            const title = document.querySelector('input[name="title"]').value || "Title / Position";
+            
+            document.getElementById('previewName').textContent = fullName;
+            document.getElementById('previewTitle').textContent = title;
+            
+            // Generate a dynamic registration number
+            const year = new Date().getFullYear();
+            const dept = document.querySelector('input[name="department"]').value || "DEPT";
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            document.getElementById('previewReg').textContent = `Reg: ${year}-${dept.toUpperCase()}-${random}`;
+        }
+
+        function previewPhoto(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('photoPreview').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Update preview on page load with existing values
+        window.onload = function() {
+            updatePreview();
+            
+            // Set default photo if exists
+            const photoInput = document.querySelector('input[name="photo"]');
+            if (photoInput && photoInput.files && photoInput.files[0]) {
+                previewPhoto({ target: photoInput });
+            }
+        }
+    </script>
+</body>
+</html>
