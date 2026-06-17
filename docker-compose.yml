@@ -1,0 +1,48 @@
+services:
+  # MySQL Database Container
+  mysql-db:
+    image: mysql:8.0
+    container_name: A-minea-db
+    environment:
+      MYSQL_ROOT_PASSWORD: Hello@123
+      MYSQL_DATABASE: A-minea-db
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Web Server Container (Spring Boot + Nginx)
+  web-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: A-minea-web
+    ports:
+      - "8443:8080"  # Website
+      - "2222:22"    # SSH
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/A-minea-db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Hello@123
+    networks:
+      - app-network
+    restart: always
+
+volumes:
+  mysql_data:
+
+networks:
+  app-network:
+    driver: bridge
